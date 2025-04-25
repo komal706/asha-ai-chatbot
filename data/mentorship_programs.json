@@ -1,0 +1,33 @@
+[
+    {
+      "id": "mentorship_001",
+      "title": "Leadership Development for Women",
+      "description": "A 6-week mentorship program aimed at enhancing leadership and strategic thinking skills for women professionals.",
+      "mentor": "Anita Sharma",
+      "date": "2025-05-10",
+      "duration": "6 weeks",
+      "mode": "Online",
+      "registration_link": "https://example.com/register/leadership-dev"
+    },
+    {
+      "id": "mentorship_002",
+      "title": "Tech Career Growth Mentorship",
+      "description": "Focused mentorship sessions with senior women in tech guiding mid-level professionals on navigating career growth.",
+      "mentor": "Ritu Malhotra",
+      "date": "2025-05-20",
+      "duration": "4 weeks",
+      "mode": "Hybrid",
+      "registration_link": "https://example.com/register/tech-career"
+    },
+    {
+      "id": "mentorship_003",
+      "title": "Return-to-Work Mentoring Circle",
+      "description": "Designed for women re-entering the workforce after a career break, this program pairs participants with experienced mentors.",
+      "mentor": "Pooja Nair",
+      "date": "2025-06-01",
+      "duration": "5 weeks",
+      "mode": "In-person (Bangalore)",
+      "registration_link": "https://example.com/register/return-to-work"
+    }
+  ]
+  

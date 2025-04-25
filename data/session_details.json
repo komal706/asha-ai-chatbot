@@ -1,0 +1,31 @@
+{
+    "session_001": {
+      "user_id": "user_123",
+      "history": [
+        {
+          "role": "user",
+          "message": "Hi, I'm looking for remote jobs in marketing."
+        },
+        {
+          "role": "assistant",
+          "message": "Sure! Here are some remote marketing jobs available right now..."
+        }
+      ],
+      "last_updated": "2025-04-16T10:23:00"
+    },
+    "session_002": {
+      "user_id": "user_456",
+      "history": [
+        {
+          "role": "user",
+          "message": "Are there any upcoming mentorship events?"
+        },
+        {
+          "role": "assistant",
+          "message": "Yes! Here's a list of upcoming mentorship programs you can register for..."
+        }
+      ],
+      "last_updated": "2025-04-16T10:25:30"
+    }
+  }
+  
