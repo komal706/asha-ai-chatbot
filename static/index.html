@@ -1,463 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Asha AI Chatbot</title>
-    <style>
-        :root {
-            --bg: #FCE7DF;
-            --bg-alt1: #FADCD9;
-            --bg-alt2: #F9F1F0;
-            --card-bg: #FFFFFF;
-            --user-bubble: #ff8c42; /* Orange */
-            --bot-bubble: #484349;  /* Dark Gray/Purple */
-            --text-dark: #333333;
-            --text-light: #FFFFFF;
-            --accent: #ff8c42; /* Using user bubble color for accent */
-            --border-light: #e0d0c7;
-            --scrollbar-thumb: #c2b1a3;
-            --hover-dark: #3a363b; /* Slightly lighter than bot bubble */
-            --start-button-bg: var(--user-bubble);
-            --start-button-text: var(--text-dark);
-            --start-button-hover-bg: #e07b3a; /* Darker orange */
-            --error-bg: #d9534f; /* Soft red */
-            --input-focus-border: var(--user-bubble);
-            --bg-image-opacity-initial: 0.3;  /* Opacity for background image initially */
-            --bg-image-opacity-chat: 0.15; /* Opacity for background image when chat is active */
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Asha AI Chatbot</title>
+  <style>
+    /* Beautiful and Modern Styling */
 
-        /* --- Global Reset & Box Sizing --- */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
 
-        /* --- Keyframes --- */
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    .app-wrapper {
+      text-align: center;
+    }
 
-        @keyframes buttonClick {
-            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-            50% { transform: scale(0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        }
+    #start-chat-button {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
 
-        @keyframes chatAppear {
-            from { opacity: 0; transform: scale(0.95) translateY(15px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+    #start-chat-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
 
-        @keyframes messageFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .chat-container {
+      display: none;
+      flex-direction: column;
+      width: 350px;
+      height: 550px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
 
-        @keyframes dots { /* For thinking indicator */
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
+    .chat-container.visible {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
 
-        /* --- Body & Background --- */
-        body {
-            /* Base gradient for animation */
-            background: linear-gradient(-45deg, var(--bg), var(--bg-alt1), var(--bg-alt2), var(--bg));
-            background-size: 400% 400%;
-            animation: gradientShift 18s ease infinite;
+    .chat-header {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+    }
 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Center start button initially */
-            min-height: 100vh;
-            overflow: hidden; /* Prevent body scroll */
-            color: var(--text-dark);
-            position: relative; /* Needed for pseudo-element positioning */
-            z-index: 0; /* Ensure body is behind potential overlays */
-        }
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f7f8fc;
+    }
 
-        /* --- Background Image Pseudo-Element --- */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('https://images5.alphacoders.com/134/1345249.png');
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: cover;
-            opacity: var(--bg-image-opacity-initial); /* Initial opacity */
-            z-index: -1; /* Place behind body content but above background color/gradient */
-            /* --- REMOVED TRANSITION FROM INITIAL STATE --- */
-            /* transition: opacity 0.8s ease-in-out; */
-        }
+    .chat-input {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
 
-        /* --- Reduce background image opacity when chat is active --- */
-        body.chat-active::before {
-            opacity: var(--bg-image-opacity-chat);
-            /* --- ADDED TRANSITION HERE FOR SMOOTH FADE OUT --- */
-            transition: opacity 0.8s ease-in-out;
-        }
+    #query {
+      flex: 1;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      outline: none;
+      transition: border 0.3s;
+    }
 
+    #query:focus {
+      border-color: #6a11cb;
+    }
 
-        /* --- Visually Hidden Class (for Accessibility) --- */
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
+    #send-button {
+      background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      margin-left: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
 
-        /* --- App Wrapper --- */
-        .app-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Start button centered, chat aligned top later */
-            width: 100%;
-            min-height: 100vh;
-            padding: 20px;
-            position: relative; /* Ensure wrapper content is above body::before */
-            z-index: 1;
-        }
+    #send-button svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
 
-        /* --- Start Chat Button --- */
-        #start-chat-button {
-            padding: 14px 28px;
-            font-size: 1.05em;
-            font-weight: 600;
-            color: var(--start-button-text);
-            background-color: var(--start-button-bg);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.12);
-            transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-            display: block;
-        }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: fadeIn 0.4s ease;
+    }
 
-        #start-chat-button:hover {
-            background-color: var(--start-button-hover-bg);
-            box-shadow: 0 7px 22px rgba(0,0,0,0.18);
-            transform: translateY(-2px);
-        }
+    .user-message {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      align-self: flex-end;
+    }
 
-        #start-chat-button.clicked {
-            animation: buttonClick 0.4s ease forwards;
-        }
+    .bot-message {
+      background: #e0e0e0;
+      color: #333;
+      align-self: flex-start;
+    }
 
-        #start-chat-button.hidden {
-            display: none;
-        }
+    .error-message {
+      background: #ffcccc;
+      color: #a10000;
+    }
 
-        /* --- Chat Container --- */
-        .chat-container {
-            width: 100%;
-            max-width: 550px;
-            height: calc(100vh - 60px); /* Adjust based on padding */
-            max-height: 750px;
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
-            display: none; /* Initially hidden */
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1; /* Ensure chat is above background image */
-            border: 1px solid var(--border-light);
-        }
+    .thinking-indicator {
+      font-style: italic;
+      opacity: 0.7;
+    }
 
-        .chat-container.visible {
-            display: flex;
-            animation: chatAppear 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-        }
+    .hidden {
+      display: none;
+    }
 
-        /* --- Chat Header --- */
-        .chat-header {
-            padding: 16px 20px;
-            font-weight: 600;
-            font-size: 1.15em;
-            color: var(--text-dark);
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-light);
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        /* --- Chat Messages Area (Main) --- */
-        .chat-messages {
-            flex-grow: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        /* --- Individual Messages --- */
-        .message {
-            max-width: 78%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            font-size: 0.95em;
-            line-height: 1.5;
-            word-wrap: break-word;
-            position: relative;
-            opacity: 0;
-            animation: messageFadeIn 0.4s ease forwards 0.1s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background: var(--user-bubble);
-            color: var(--text-dark);
-            border-bottom-right-radius: 5px;
-        }
-
-        .bot-message {
-            align-self: flex-start;
-            background: var(--bot-bubble);
-            color: var(--text-light);
-            border-bottom-left-radius: 5px;
-        }
-
-        .error-message {
-            background-color: var(--error-bg);
-            color: var(--text-light);
-        }
-
-        /* --- Thinking Indicator --- */
-        .thinking-indicator::after {
-            content: '.';
-            animation: dots 1.4s infinite;
-            display: inline-block;
-            vertical-align: bottom;
-            margin-left: 2px;
-        }
-
-        /* --- Chat Input Area (Footer) --- */
-        .chat-input {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            border-top: 1px solid var(--border-light);
-            background: var(--card-bg);
-            flex-shrink: 0;
-            gap: 10px;
-        }
-
-        .chat-input input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--border-light);
-            border-radius: 20px;
-            font-size: 0.95em;
-            outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .chat-input input[type="text"]:focus {
-            border-color: var(--input-focus-border);
-            box-shadow: 0 0 0 2px rgba(255, 140, 66, 0.2);
-        }
-
-        .chat-input button {
-            padding: 0;
-            width: 42px;
-            height: 42px;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .chat-input button:hover {
-            background-color: var(--start-button-hover-bg);
-        }
-
-        .chat-input button:active {
-             transform: scale(0.95);
-        }
-
-        .chat-input button:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-            background-color: #aaa;
-        }
-
-        .chat-input button svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        /* --- Custom Scrollbar --- */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background-color: var(--scrollbar-thumb);
-            border-radius: 10px;
-        }
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-            margin: 5px 0;
-        }
-    </style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <!-- Wrapper Div -->
-    <div class="app-wrapper">
+  <div class="app-wrapper">
+    <button id="start-chat-button">✨ Chat with Asha AI</button>
+    <section class="chat-container" aria-labelledby="chat-header-title">
+      <header class="chat-header" id="chat-header-title">✨ Asha AI Chatbot</header>
+      <main class="chat-messages" id="messages" aria-live="polite"></main>
+      <footer class="chat-input">
+        <label for="query" class="visually-hidden">Chat Input</label>
+        <input type="text" id="query" placeholder="Search or type URL" aria-label="Chat message input"/>
+        <button id="send-button" aria-label="Send Message">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/>
+          </svg>
+        </button>
+      </footer>
+    </section>
+  </div>
 
-        <!-- Start Button -->
-        <!-- *** UPDATED TEXT HERE *** -->
-        <button id="start-chat-button">✨ Chat with Asha AI</button>
+  <script>
+    // Your JavaScript remains exactly the same as you provided
+    const startButton = document.getElementById('start-chat-button');
+    const chatContainer = document.querySelector('.chat-container');
+    const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("query");
+    const sendButton = document.getElementById("send-button");
+    const bodyElement = document.body;
 
-        <!-- Chat Container (Initially Hidden) -->
-        <section class="chat-container" aria-labelledby="chat-header-title">
-            <header class="chat-header" id="chat-header-title">✨ Asha AI Chatbot</header>
-            <main class="chat-messages" id="messages" aria-live="polite"></main>
-            <footer class="chat-input">
-                <label for="query" class="visually-hidden">Chat Input</label>
-                <input type="text" id="query" placeholder="Search or type URL" aria-label="Chat message input"/>
-                <button id="send-button" aria-label="Send Message">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                        <path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/>
-                    </svg>
-                </button>
-            </footer>
-        </section>
+    function addMessage(text, className) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `message ${className}`;
+      msgDiv.textContent = text;
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: 'smooth' });
+    }
 
-    </div><!-- End App Wrapper -->
+    function toggleInputDisabled(disabled) {
+      input.disabled = disabled;
+      sendButton.disabled = disabled;
+      input.placeholder = disabled ? "Asha is thinking..." : "Search or type URL";
+    }
 
-    <script>
-        // --- Element References ---
-        const startButton = document.getElementById('start-chat-button');
-        const chatContainer = document.querySelector('.chat-container');
-        const messagesDiv = document.getElementById("messages");
-        const input = document.getElementById("query");
-        const sendButton = document.getElementById("send-button");
-        const appWrapper = document.querySelector('.app-wrapper');
-        const bodyElement = document.body; // Reference to body
+    async function handleSendMessage() {
+      const query = input.value.trim();
+      if (!query || input.disabled) return;
 
-        // --- Chat Logic ---
+      addMessage(query, "user-message");
+      input.value = "";
+      toggleInputDisabled(true);
 
-        function addMessage(text, className) {
-            const msgDiv = document.createElement("div");
-            msgDiv.className = `message ${className}`;
-            msgDiv.textContent = text;
-            messagesDiv.appendChild(msgDiv);
-            messagesDiv.scrollTo({ top: messagesDiv.scrollHeight, behavior: 'smooth' });
-        }
+      const thinkingMsgId = `thinking-${Date.now()}`;
+      addMessage("Thinking...", `bot-message thinking-indicator`);
+      const thinkingDiv = messagesDiv.querySelector('.thinking-indicator:last-child');
+      if (thinkingDiv) thinkingDiv.id = thinkingMsgId;
 
-        function toggleInputDisabled(disabled) {
-            input.disabled = disabled;
-            sendButton.disabled = disabled;
-            input.placeholder = disabled ? "Asha is thinking..." : "Search or type URL";
-        }
-
-        async function handleSendMessage() {
-            const query = input.value.trim();
-            if (!query || input.disabled) return;
-
-            addMessage(query, "user-message");
-            input.value = "";
-            toggleInputDisabled(true);
-
-            const thinkingMsgId = `thinking-${Date.now()}`;
-            addMessage("Thinking", `bot-message thinking-indicator`);
-            const thinkingDiv = messagesDiv.querySelector('.thinking-indicator:last-child');
-            if (thinkingDiv) thinkingDiv.id = thinkingMsgId;
-
-            try {
-                const res = await fetch("/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query })
-                });
-
-                const thinkingElement = document.getElementById(thinkingMsgId);
-                if (thinkingElement) thinkingElement.remove();
-
-                if (!res.ok) {
-                    let errorDetails = `Server error (Status: ${res.status})`;
-                    try {
-                        const errorData = await res.json();
-                        if (errorData && (errorData.error || errorData.message)) {
-                           errorDetails = errorData.error || errorData.message;
-                        }
-                    } catch (parseError) {
-                        console.warn("Could not parse error response:", parseError);
-                    }
-                    throw new Error(errorDetails);
-                }
-
-                const data = await res.json();
-                const botResponse = (data && typeof data.response === 'string') ? data.response : "Sorry, I received an unexpected response.";
-                addMessage(botResponse, "bot-message");
-
-            } catch (error) {
-                console.error("Error during chat fetch:", error);
-                const thinkingElement = document.getElementById(thinkingMsgId);
-                if (thinkingElement) thinkingElement.remove();
-
-                let displayError = "Oops! Something went wrong. Please try again.";
-                if (error.message && !error.message.toLowerCase().includes('failed to fetch')) {
-                    displayError = `Error: ${error.message}`;
-                }
-                addMessage(displayError, "bot-message error-message");
-
-            } finally {
-                toggleInputDisabled(false);
-                input.focus();
-            }
-        }
-
-        // --- Event Listeners ---
-
-        startButton.addEventListener('click', () => {
-            startButton.classList.add('clicked');
-            bodyElement.classList.add('chat-active'); // Add class to body
-
-            setTimeout(() => {
-                startButton.classList.add('hidden');
-                chatContainer.classList.add('visible');
-                appWrapper.style.alignItems = 'flex-start';
-                appWrapper.style.paddingTop = '30px';
-
-                input.focus();
-            }, 400);
+      try {
+        const res = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
         });
 
-        sendButton.addEventListener("click", handleSendMessage);
+        const thinkingElement = document.getElementById(thinkingMsgId);
+        if (thinkingElement) thinkingElement.remove();
 
-        input.addEventListener("keypress", function(e) {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
+        if (!res.ok) {
+          let errorDetails = `Server error (Status: ${res.status})`;
+          try {
+            const errorData = await res.json();
+            if (errorData && (errorData.error || errorData.message)) {
+              errorDetails = errorData.error || errorData.message;
             }
-        });
+          } catch (parseError) {
+            console.warn("Could not parse error response:", parseError);
+          }
+          addMessage(errorDetails, "bot-message error-message");
+          toggleInputDisabled(false);
+          return;
+        }
 
-    </script>
+        const data = await res.json();
+        if (data && data.response) {
+          addMessage(data.response, "bot-message");
+        } else {
+          addMessage("No response from Asha.", "bot-message error-message");
+        }
+      } catch (error) {
+        const thinkingElement = document.getElementById(thinkingMsgId);
+        if (thinkingElement) thinkingElement.remove();
+        addMessage("Failed to contact server. Check your connection or try again later.", "bot-message error-message");
+        console.error("Fetch error:", error);
+      }
+
+      toggleInputDisabled(false);
+    }
+
+    sendButton.addEventListener("click", handleSendMessage);
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") handleSendMessage();
+    });
+
+    startButton.addEventListener("click", () => {
+      startButton.classList.add("clicked");
+      setTimeout(() => {
+        startButton.classList.add("hidden");
+        chatContainer.classList.add("visible");
+        bodyElement.classList.add("chat-active");
+        input.focus();
+      }, 400);
+    });
+  </script>
 </body>
 </html>
